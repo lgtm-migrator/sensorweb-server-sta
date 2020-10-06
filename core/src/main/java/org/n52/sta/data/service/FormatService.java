@@ -27,14 +27,42 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta.data.service;
 
 import org.n52.series.db.beans.FormatEntity;
-import org.springframework.stereotype.Repository;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.data.MutexFactory;
+import org.n52.sta.data.repositories.FormatRepository;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@Repository
-public interface LocationEncodingRepository extends EntityGraphRepository<FormatEntity, Long> {
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Component
+@DependsOn({"springApplicationContext"})
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public class FormatService {
 
+    private final MutexFactory mutexFactory;
+    private final FormatRepository formatRepository;
+
+    public FormatService(MutexFactory mutexFactory,
+                         FormatRepository formatRepository) {
+        this.mutexFactory = mutexFactory;
+        this.formatRepository = formatRepository;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public FormatEntity createOrFetchFormat(FormatEntity formatEntity) throws STACRUDException {
+        synchronized (mutexFactory.getLock(formatEntity.getFormat())) {
+            if (!formatRepository.existsByFormat(formatEntity.getFormat())) {
+                return formatRepository.saveAndFlush(formatEntity);
+            } else {
+                return formatRepository.findByFormat(formatEntity.getFormat());
+            }
+        }
+    }
 }

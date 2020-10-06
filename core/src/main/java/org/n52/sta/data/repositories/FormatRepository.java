@@ -33,6 +33,8 @@ import org.n52.series.db.beans.FormatEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 @Transactional
 @Repository
 public interface FormatRepository extends EntityGraphRepository<FormatEntity, Long> {
@@ -40,5 +42,7 @@ public interface FormatRepository extends EntityGraphRepository<FormatEntity, Lo
     boolean existsByFormat(String format);
 
     FormatEntity findByFormat(String format);
+
+    Set<FormatEntity> findAllByFormat(String format);
 
 }

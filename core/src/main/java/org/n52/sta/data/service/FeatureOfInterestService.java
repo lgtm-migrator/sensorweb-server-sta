@@ -54,7 +54,6 @@ import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
-import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -93,20 +92,20 @@ public class FeatureOfInterestService
     private static final FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
-    private final FormatRepository formatRepository;
     private final ObservationRepository observationRepository;
     private final DatastreamRepository datastreamRepository;
+    private final FormatService formatService;
 
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
-                                    FormatRepository formatRepository,
                                     ObservationRepository observationRepository,
                                     DatastreamRepository datastreamRepository,
+                                    FormatService formatService,
                                     EntityManager em) {
         super(repository,
               em,
               AbstractFeatureEntity.class);
-        this.formatRepository = formatRepository;
+        this.formatService = formatService;
         this.observationRepository = observationRepository;
         this.datastreamRepository = datastreamRepository;
     }
@@ -169,7 +168,8 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public AbstractFeatureEntity<?> createOrfetch(AbstractFeatureEntity<?> feature) throws STACRUDException {
+    public synchronized AbstractFeatureEntity<?> createOrfetch(AbstractFeatureEntity<?> feature)
+        throws STACRUDException {
         // Get by reference
         if (feature.getStaIdentifier() != null && !feature.isSetName()) {
             Optional<AbstractFeatureEntity<?>> optionalEntity =
@@ -227,7 +227,8 @@ public class FeatureOfInterestService
                 }
             } else {
                 feature.setXml(null);
-                checkFeatureType(feature);
+
+                feature.setFeatureType(formatService.createOrFetchFormat(feature.getFeatureType()));
                 return getRepository().save(feature);
             }
         }
@@ -351,18 +352,6 @@ public class FeatureOfInterestService
                 }
             });
             getRepository().flush();
-        }
-    }
-
-    private void checkFeatureType(AbstractFeatureEntity<?> feature) throws STACRUDException {
-        FormatEntity format;
-        synchronized (getLock(feature.getFeatureType().getFormat())) {
-            if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
-                format = formatRepository.save(feature.getFeatureType());
-            } else {
-                format = formatRepository.findByFormat(feature.getFeatureType().getFormat());
-            }
-            feature.setFeatureType(format);
         }
     }
 

@@ -44,16 +44,12 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
@@ -83,16 +79,15 @@ public class LocationService
 
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
-    private final LocationEncodingRepository locationEncodingRepository;
-
     private final boolean updateFOIFeatureEnabled;
+    private final FormatService formatService;
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
-                           LocationEncodingRepository locationEncodingRepository,
+                           FormatService formatService,
                            EntityManager em) {
         super(repository, em, LocationEntity.class);
-        this.locationEncodingRepository = locationEncodingRepository;
+        this.formatService = formatService;
         this.updateFOIFeatureEnabled = updateFOI;
     }
 
@@ -182,7 +177,7 @@ public class LocationService
     }
 
     @Override
-    public LocationEntity createOrfetch(LocationEntity newLocation) throws STACRUDException {
+    public synchronized LocationEntity createOrfetch(LocationEntity newLocation) throws STACRUDException {
         LocationEntity location = newLocation;
         if (!location.isProcessed()) {
             if (location.getStaIdentifier() != null && !location.isSetName()) {
@@ -299,29 +294,9 @@ public class LocationService
 
     private void checkLocationEncoding(LocationEntity location) throws STACRUDException {
         if (location.getLocationEncoding() != null) {
-            FormatEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
+            FormatEntity optionalLocationEncoding = formatService.createOrFetchFormat(location.getLocationEncoding());
             location.setLocationEncoding(optionalLocationEncoding);
         }
-    }
-
-    private FormatEntity createLocationEncoding(FormatEntity locationEncoding) throws STACRUDException {
-        ExampleMatcher createEncodingTypeMatcher = createEncodingTypeMatcher();
-        synchronized (getLock(locationEncoding.getFormat())) {
-            if (!locationEncodingRepository
-                .exists(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
-                return locationEncodingRepository.save(locationEncoding);
-            }
-            return locationEncodingRepository
-                .findOne(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
-        }
-    }
-
-    private Example<FormatEntity> createEncodingTypeExample(FormatEntity locationEncoding, ExampleMatcher matcher) {
-        return Example.of(locationEncoding, matcher);
-    }
-
-    private ExampleMatcher createEncodingTypeMatcher() {
-        return ExampleMatcher.matching().withMatcher(ENCODINGTYPE, GenericPropertyMatchers.ignoreCase());
     }
 
     private void processThings(LocationEntity location) throws STACRUDException {
