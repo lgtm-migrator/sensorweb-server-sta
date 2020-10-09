@@ -27,29 +27,15 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data.repositories.sta;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+@Transactional
+@Repository
+public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>>,
+                                                     StaIdentifierRepository<AbstractFeatureEntity<?>> {
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
 }

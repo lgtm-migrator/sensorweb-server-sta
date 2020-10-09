@@ -30,9 +30,12 @@
 package org.n52.sta.data.service;
 
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.aux.FormatRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,23 +46,49 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = "auxiliaryTransactionManager")
 public class FormatService {
 
+    private static final Logger logger = LoggerFactory.getLogger(FormatService.class);
     private final MutexFactory mutexFactory;
     private final FormatRepository formatRepository;
 
+    private String[] COMMON_FORMATS = {
+        "application/pdf",
+        "application/vnd.geo+json",
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation",
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation",
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation",
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SOLID,
+        SfConstants.SAMPLING_FEAT_TYPE_SF_SPECIMEN,
+    };
+
     public FormatService(MutexFactory mutexFactory,
-                         FormatRepository formatRepository) {
+                         FormatRepository formatRepository) throws STACRUDException {
         this.mutexFactory = mutexFactory;
         this.formatRepository = formatRepository;
+
+        // persist common formats
+        for (String common_format : COMMON_FORMATS) {
+            FormatEntity formatEntity = new FormatEntity();
+            formatEntity.setFormat(common_format);
+            createOrFetchFormat(formatEntity);
+        }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = "auxiliaryTransactionManager")
     public FormatEntity createOrFetchFormat(FormatEntity formatEntity) throws STACRUDException {
         synchronized (mutexFactory.getLock(formatEntity.getFormat())) {
             if (!formatRepository.existsByFormat(formatEntity.getFormat())) {
-                return formatRepository.saveAndFlush(formatEntity);
+                logger.debug("Persisting new FormatEntity: " + formatEntity.getFormat());
+                return formatRepository.save(formatEntity);
             } else {
                 return formatRepository.findByFormat(formatEntity.getFormat());
             }

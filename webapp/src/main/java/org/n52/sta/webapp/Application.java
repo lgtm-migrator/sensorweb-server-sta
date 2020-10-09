@@ -29,7 +29,7 @@
 
 package org.n52.sta.webapp;
 
-import org.n52.sta.data.repositories.MessageBusRepository;
+import org.n52.sta.data.repositories.sta.MessageBusRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;

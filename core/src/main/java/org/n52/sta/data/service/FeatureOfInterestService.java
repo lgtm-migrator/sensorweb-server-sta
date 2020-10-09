@@ -51,14 +51,15 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DatastreamRepository;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.FeatureOfInterestRepository;
-import org.n52.sta.data.repositories.ObservationRepository;
+import org.n52.sta.data.repositories.sta.DatastreamRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.FeatureOfInterestRepository;
+import org.n52.sta.data.repositories.sta.ObservationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -101,7 +102,7 @@ public class FeatureOfInterestService
                                     ObservationRepository observationRepository,
                                     DatastreamRepository datastreamRepository,
                                     FormatService formatService,
-                                    EntityManager em) {
+                                    @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository,
               em,
               AbstractFeatureEntity.class);

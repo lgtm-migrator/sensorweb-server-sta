@@ -39,9 +39,10 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationRelationQuerySpecifications;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.ObservationRelationRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.ObservationRelationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
@@ -68,7 +69,8 @@ public class ObservationRelationService
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
-    public ObservationRelationService(ObservationRelationRepository repository, EntityManager em) {
+    public ObservationRelationService(ObservationRelationRepository repository,
+                                      @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, ObservationRelationEntity.class);
     }
 

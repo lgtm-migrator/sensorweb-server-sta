@@ -27,43 +27,37 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.series.db.beans.CategoryEntity;
+import org.n52.sta.data.repositories.aux.CategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-public class MutexFactory {
+@DependsOn({"springApplicationContext"})
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public class CategoryService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);
+    public static final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";
 
-    // MutexMap used for locking during thread-bound in-memory computations on database entities
-    private ConcurrentReferenceHashMap<String, Object> lockMap;
+    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
-    public MutexFactory() {
-        this.lockMap = new ConcurrentReferenceHashMap<>();
-    }
-
-    /**
-     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
-     * Uses weak references so Map is automatically cleared by GC.
-     *
-     * @param key name of the lock
-     * @return Object used for holding the lock
-     * @throws STACRUDException If the lock can not be obtained.
-     */
-    public synchronized Object getLock(String key) throws STACRUDException {
-        if (key != null) {
-            LOGGER.debug("Locking:" + key);
-            return this.lockMap.compute(key, (k, v) -> v == null ? new Object() : v);
-        } else {
-            throw new STACRUDException("Unable to obtain Lock. No name specified!");
+    public CategoryService(CategoryRepository categoryRepository) {
+        if (!categoryRepository.existsByIdentifier(DEFAULT_CATEGORY)) {
+            CategoryEntity category = new CategoryEntity();
+            category.setIdentifier(DEFAULT_CATEGORY);
+            category.setName(DEFAULT_CATEGORY);
+            category.setDescription("Default SOS category");
+            logger.debug("Persisting default CategoryEntity: " + category.getName());
+            categoryRepository.save(category);
         }
     }
 

@@ -54,17 +54,18 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DataRepository;
-import org.n52.sta.data.repositories.DatastreamRepository;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.repositories.ObservationParameterRepository;
-import org.n52.sta.data.repositories.ObservationRepository;
+import org.n52.sta.data.repositories.sta.DataRepository;
+import org.n52.sta.data.repositories.sta.DatastreamRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.LocationRepository;
+import org.n52.sta.data.repositories.sta.ObservationParameterRepository;
+import org.n52.sta.data.repositories.sta.ObservationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -102,7 +103,7 @@ public class ObservationService
 
     @Autowired
     public ObservationService(ObservationRepository<ObservationEntity<?>> repository,
-                              EntityManager em,
+                              @Qualifier("entityManagerFactory") EntityManager em,
                               DataRepository<DataEntity<?>> dataRepository,
                               DatastreamRepository datastreamRepository,
                               ObservationParameterRepository parameterRepository) {

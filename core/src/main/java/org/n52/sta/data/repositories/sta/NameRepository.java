@@ -27,29 +27,19 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data.repositories.sta;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.n52.series.db.beans.HibernateRelations;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+import java.util.Optional;
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
+@NoRepositoryBean
+@Transactional
+public interface NameRepository<T extends HibernateRelations.HasName> extends AbstractStaRepository<T> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+    boolean existsByName(String name);
+
+    Optional<T> findByName(String name);
 }

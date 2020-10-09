@@ -41,10 +41,11 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservationGroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationGroupQuerySpecifications;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.ObservationGroupParameterRepository;
-import org.n52.sta.data.repositories.ObservationGroupRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.ObservationGroupParameterRepository;
+import org.n52.sta.data.repositories.sta.ObservationGroupRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -76,7 +77,7 @@ public class ObservationGroupService
 
     public ObservationGroupService(ObservationGroupRepository repository,
                                    ObservationGroupParameterRepository parameterRepository,
-                                   EntityManager em) {
+                                   @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, ObservationGroupEntity.class);
         this.parameterRepository = parameterRepository;
     }

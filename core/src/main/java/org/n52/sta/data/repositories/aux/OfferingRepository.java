@@ -27,29 +27,24 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data.repositories.aux;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.n52.series.db.beans.OfferingEntity;
+import org.n52.sta.data.repositories.sta.IdentifierNameRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+import java.util.Optional;
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
+@Repository
+@Transactional(transactionManager = "auxiliaryTransactionManager")
+public interface OfferingRepository extends IdentifierNameRepository<OfferingEntity> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+    @Override
+    @Transactional(transactionManager = "auxiliaryTransactionManager")
+    boolean existsByIdentifier(String identifier);
+
+    @Override
+    @Transactional(transactionManager = "auxiliaryTransactionManager")
+    Optional<OfferingEntity> findByIdentifier(String identifier, FetchGraph... relatedEntities);
 }

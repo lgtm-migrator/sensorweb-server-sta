@@ -41,13 +41,14 @@ import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
-import org.n52.sta.data.repositories.DatastreamRepository;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.PhenomenonRepository;
+import org.n52.sta.data.repositories.sta.DatastreamRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -81,7 +82,7 @@ public class ObservedPropertyService
     @Autowired
     public ObservedPropertyService(PhenomenonRepository repository,
                                    DatastreamRepository datastreamRepository,
-                                   EntityManager em) {
+                                   @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, PhenomenonEntity.class);
         this.datastreamRepository = datastreamRepository;
     }

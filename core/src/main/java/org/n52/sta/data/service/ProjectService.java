@@ -40,9 +40,10 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ProjectEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ProjectQuerySpecifications;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.ProjectRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.ProjectRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -68,7 +69,7 @@ public class ProjectService
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
-    public ProjectService(ProjectRepository repository, EntityManager em) {
+    public ProjectService(ProjectRepository repository, @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, ProjectEntity.class);
     }
 

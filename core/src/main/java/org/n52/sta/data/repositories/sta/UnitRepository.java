@@ -27,29 +27,26 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data.repositories.sta;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.n52.series.db.beans.UnitEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+@Transactional
+@Repository
+public interface UnitRepository extends JpaRepository<UnitEntity, Long>, EntityGraphRepository<UnitEntity, Long> {
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
+    boolean existsByIdentifier(String identifier);
+
+    UnitEntity findByIdentifier(String identifier);
+
+    default boolean existsBySymbol(String symbol) {
+        return existsByIdentifier(symbol);
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    default UnitEntity findBySymbol(String symbol) {
+        return findByIdentifier(symbol);
     }
 }

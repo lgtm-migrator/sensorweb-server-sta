@@ -27,44 +27,22 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data;
+package org.n52.sta.data.repositories.sta;
 
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+
+import javax.persistence.EntityManager;
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-public class MutexFactory {
+public class AuxiliaryMessageBusRepositoryImpl<T, I extends Serializable> extends MessageBusRepository<T, I> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);
-
-    // MutexMap used for locking during thread-bound in-memory computations on database entities
-    private ConcurrentReferenceHashMap<String, Object> lockMap;
-
-    public MutexFactory() {
-        this.lockMap = new ConcurrentReferenceHashMap<>();
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    AuxiliaryMessageBusRepositoryImpl(JpaEntityInformation<T, Long> entityInformation,
+                                      @Qualifier("auxiliaryEntityManagerFactory") EntityManager entityManager) {
+        super(entityInformation, entityManager);
     }
-
-    /**
-     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
-     * Uses weak references so Map is automatically cleared by GC.
-     *
-     * @param key name of the lock
-     * @return Object used for holding the lock
-     * @throws STACRUDException If the lock can not be obtained.
-     */
-    public synchronized Object getLock(String key) throws STACRUDException {
-        if (key != null) {
-            LOGGER.debug("Locking:" + key);
-            return this.lockMap.compute(key, (k, v) -> v == null ? new Object() : v);
-        } else {
-            throw new STACRUDException("Unable to obtain Lock. No name specified!");
-        }
-    }
-
 }

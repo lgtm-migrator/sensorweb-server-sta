@@ -85,6 +85,14 @@ spring:
     password: postgres
     url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
+    type: "com.zaxxer.hikari.HikariDataSource"
+
+    hikari:
+      maximum-pool-size: 10
+      leakDetectionThreshold: 60000
+      transaction-isolation: 1
+      connection-timeout: 0
+
   jpa:
     openInView: false
     properties:

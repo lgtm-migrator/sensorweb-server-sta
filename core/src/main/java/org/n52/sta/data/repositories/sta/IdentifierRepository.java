@@ -27,29 +27,39 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data.repositories.sta;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+import java.util.Optional;
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
+@NoRepositoryBean
+@Transactional
+public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+    /**
+     * Checks whether Entity with given id exists.
+     *
+     * @param identifier Identifier of the Entity
+     * @return true if Entity exists. false otherwise
+     */
+    boolean existsByIdentifier(String identifier);
+
+    /**
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
+     *
+     * @param identifier      Identifier of the wanted Entity
+     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
+     *                        graph internally. may be null.
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
+    Optional<T> findByIdentifier(String identifier, FetchGraph... relatedEntities);
+
+    /**
+     * Deletes Entity with given Identifier
+     *
+     * @param identifier Identifier of the Entity
+     */
+    void deleteByIdentifier(String identifier);
 }

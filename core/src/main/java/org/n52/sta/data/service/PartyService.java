@@ -40,9 +40,10 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.PartyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.PartyQuerySpecifications;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.PartyRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.PartyRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -68,7 +69,7 @@ public class PartyService
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
-    public PartyService(PartyRepository repository, EntityManager em) {
+    public PartyService(PartyRepository repository, @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, PartyEntity.class);
     }
 

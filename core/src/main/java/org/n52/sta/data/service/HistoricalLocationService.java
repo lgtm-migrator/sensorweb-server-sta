@@ -40,13 +40,14 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.HistoricalLocationRepository;
-import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.repositories.sta.EntityGraphRepository;
+import org.n52.sta.data.repositories.sta.HistoricalLocationRepository;
+import org.n52.sta.data.repositories.sta.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -80,7 +81,7 @@ public class HistoricalLocationService
     @Autowired
     public HistoricalLocationService(HistoricalLocationRepository repository,
                                      LocationRepository locationRepository,
-                                     EntityManager em) {
+                                     @Qualifier("entityManagerFactory") EntityManager em) {
         super(repository, em, HistoricalLocationEntity.class);
         this.locationRepository = locationRepository;
     }
@@ -243,7 +244,7 @@ public class HistoricalLocationService
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
-    
+
     private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation)
         throws STACRUDException {
         PlatformEntity thing = getThingService().createOrfetch(historicalLocation.getThing());

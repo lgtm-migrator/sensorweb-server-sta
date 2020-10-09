@@ -27,44 +27,43 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data;
+package org.n52.sta.data.repositories.sta;
 
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-public class MutexFactory {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);
-
-    // MutexMap used for locking during thread-bound in-memory computations on database entities
-    private ConcurrentReferenceHashMap<String, Object> lockMap;
-
-    public MutexFactory() {
-        this.lockMap = new ConcurrentReferenceHashMap<>();
-    }
+@NoRepositoryBean
+@Transactional
+public interface StaIdentifierRepository<T> extends EntityGraphRepository<T, Long> {
 
     /**
-     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
-     * Uses weak references so Map is automatically cleared by GC.
+     * Checks whether Entity with given id exists.
      *
-     * @param key name of the lock
-     * @return Object used for holding the lock
-     * @throws STACRUDException If the lock can not be obtained.
+     * @param identifier Identifier of the Entity
+     * @return true if Entity exists. false otherwise
      */
-    public synchronized Object getLock(String key) throws STACRUDException {
-        if (key != null) {
-            LOGGER.debug("Locking:" + key);
-            return this.lockMap.compute(key, (k, v) -> v == null ? new Object() : v);
-        } else {
-            throw new STACRUDException("Unable to obtain Lock. No name specified!");
-        }
-    }
+    boolean existsByStaIdentifier(String identifier);
+
+    /**
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
+     *
+     * @param identifier      Identifier of the wanted Entity
+     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
+     *                        graph internally. may be null.
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
+    Optional<T> findByStaIdentifier(String identifier, EntityGraphRepository.FetchGraph... relatedEntities);
+
+    /**
+     * Deletes Entity with given Identifier
+     *
+     * @param identifier Identifier of the Entity
+     */
+    void deleteByStaIdentifier(String identifier);
 
 }
